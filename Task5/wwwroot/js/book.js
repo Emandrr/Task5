@@ -5,9 +5,13 @@ let hasMoreData = true;
 let currentLanguage = '';
 let currentBooks = window.currentBooks || [];
 let allLoadedBooks = [];
+let isFirstLoad = true;
 $(document).ready(function () {
     currentLanguage = $('#languageSelect').val();
-    currentBooks = window.currentBooks || [];
+    if (isFirstLoad) {
+        currentBooks = window.currentBooks || [];
+        isFirstLoad = false; 
+    }
     allLoadedBooks = [...currentBooks];
     bindInputHandlers();
     bindEventHandlers();
@@ -104,10 +108,11 @@ function renderItems(items) {
 }
 
 function updateData(likes, reviews) {
+    $('#items-table-body').empty();
     $.post({
         url: '/Home/UpdateFilterData',
         contentType: 'application/json',
-        data: JSON.stringify({ likes, reviews, books: currentBooks }),
+        data: JSON.stringify({ likes, reviews, books: allLoadedBooks }),
         success: handleUpdateSuccess,
         complete: hideSpinner
     });
@@ -115,6 +120,7 @@ function updateData(likes, reviews) {
 
 function handleUpdateSuccess(data) {
     if (data?.length) {
+        allLoadedBooks = [];
         currentBooks = data;
         $('#items-table-body').empty();
         renderItems(data);

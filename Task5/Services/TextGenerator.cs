@@ -23,8 +23,8 @@ namespace Task5.Services
         
         public TextGenerator()
         {
-            faker = new Faker("en");
-            lorem = new Bogus.DataSets.Lorem(locale:"en");
+            faker = new Faker("vi");
+            lorem = new Bogus.DataSets.Lorem(locale:"vi");
 
         }
         public string GetAuthor()

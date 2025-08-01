@@ -11,7 +11,10 @@
   <ItemGroup>
     <PackageReference Include="Bogus" Version="35.6.3" />
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.0" />
+    <PackageReference Include="FakeItEasy" Version="8.3.0" />
+    <PackageReference Include="GenFu" Version="1.6.0" />
     <PackageReference Include="ISBNQuery" Version="2.0.3" />
+    <PackageReference Include="Lorem.Universal.NET" Version="5.0.0" />
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.7.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />

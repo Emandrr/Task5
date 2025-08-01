@@ -3,7 +3,6 @@
     ViewData["Title"] = "Список элементов";
 }
 @using System.Text.Json
-
 <style>
     .sticky-controls {
         position: sticky;
@@ -42,9 +41,9 @@
         <div class="input-group me-3">
             <label for="languageSelect" class="input-group-text">Language</label>
             <select id="languageSelect" class="form-select">
-                <option value="en">English (US)</option>
                 <option value="vi">Vietnam (Tiếng Việt)</option>
                 <option value="ja">Japanese (日本語)</option>
+                <option value="en">English</option>
             </select>
         </div>
         <div class="input-group me-3">
@@ -87,7 +86,7 @@
                 <td>@item.Publisher</td>
             </tr>
             <tr class="details-row" id="details-@item.Id">
-                <td colspan="3">
+                <td colspan="5">
                     <div class="book-details-container">
                         <div class="book-layout">
                             <div class="book-image-section">
@@ -120,16 +119,294 @@
         }
     </tbody>
 </table>
-
 <div id="loading-spinner" class="loading-spinner">
     <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Загрузка...</span>
     </div>
 </div>
-
 @section Scripts {
     <script>
-        window.currentBooks = @Html.Raw(JsonSerializer.Serialize(Model));
+        $(document).ready(function () {
+            function validateReviewValue(value) {
+                var numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                    return 0;
+                }
+                return Math.max(0, Math.min(20, numValue));
+            }
+            $(document).on('input change keyup', 'input[id*="review"], input[name*="review"]', function() {
+                var currentValue = $(this).val();
+                var validatedValue = validateReviewValue(currentValue);
+                if (parseFloat(currentValue) !== validatedValue) {
+                    $(this).val(validatedValue.toFixed(1));
+                    if (parseFloat(currentValue) > 20) {
+                        showWarning('Максимальное значение для reviews: 20');
+                    } else if (parseFloat(currentValue) < 0) {
+                        showWarning('Минимальное значение для reviews: 0');
+                    }
+                }
+            });
+            function showWarning(message) {
+                var toastHtml = `
+                    <div class="toast align-items-center text-white bg-warning border-0 position-fixed"
+                         style="top: 20px; right: 20px; z-index: 9999;" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                var $toast = $(toastHtml).appendTo('body');
+                var toast = new bootstrap.Toast($toast[0], {
+                    autohide: true,
+                    delay: 3000
+                });
+                toast.show();
+                $toast.on('hidden.bs.toast', function() {
+                    $(this).remove();
+                });
+            }
+            $(document).on('blur', '#reviewInput', function() {
+                var value = parseFloat($(this).val());
+                if (value > 20) {
+                    $(this).val('20.0');
+                    showWarning('Значение reviews ограничено до 20');
+                } else if (value < 0) {
+                    $(this).val('0.0');
+                    showWarning('Значение reviews не может быть отрицательным');
+                }
+            });
+            $(document).on('keydown', '#reviewInput', function(e) {
+                if (e.key === 'Enter') {
+                    var value = parseFloat($(this).val());
+                    if (value > 20) {
+                        $(this).val('20.0');
+                        showWarning('Максимальное значение: 20');
+                        return false;
+                    } else if (value < 0) {
+                        $(this).val('0.0');
+                        showWarning('Минимальное значение: 0');
+                        return false;
+                    }
+                }
+            });
+            var take = 10;
+            var isLoading = false;
+            var hasMoreData = true;
+            var currentLanguage = $('#languageSelect').val();
+            var currentBooks = @Html.Raw(JsonSerializer.Serialize(Model, new JsonSerializerOptions
+                      {
+                          WriteIndented = false,
+                          IncludeFields = true
+                      }))
+            function updateStickyHeaderPosition() {
+                var controlsHeight = $('.sticky-controls').outerHeight();
+                $('.sticky-header').css('top', controlsHeight + 'px');
+            }
+            function renderItems(items) {
+                var html = '';
+                $.each(items, function (index, item) {
+                    html += '<tr class="item-row" data-item-id="' + item.id + '">';
+                    html += '<td>' + item.id + '</td>';
+                    html += '<td>' + item.isbn + '</td>';
+                    html += '<td>' + item.title + '</td>';
+                    html += '<td>' + item.author + '</td>';
+                    html += '<td>' + item.publisher + '</td>';
+                    html += '</tr>';
+                    html += '<tr class="details-row" id="details-' + item.id + '">';
+                    html += '<td colspan="5">';
+                    html += '<div class="book-details-container">';
+                    html += '<div class="book-layout">';
+                    html += '<div class="book-image-section">';
+                    html += '<div class="book-image-container">';
+                    html += '<img src="' + (item.image || '') + '" alt="Обложка книги" />';
+                    html += '</div>';
+                    html += '<div class="book-likes">';
+                    html += '<span class="likes-count">' + (item.numberOfLikes) + '</span>';
+                    html += '<span class="like-icon">👍</span>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<div class="book-info-section">';
+                    html += '<h2 class="book-title">' + item.title + '</h2>';
+                    html += '<p class="book-author">by ' + item.author + '</p>';
+                    html += '<p class="book-group">' + item.publisher + '</p>';
+                    html += '<h3 class="reviews-header">Review</h3>';
+                    if (item.authorRev && item.textRev && item.authorRev.length > 0) {
+                        for (var i = 0; i < item.authorRev.length; i++) {
+                            html += '<div class="p-3 bg-white border rounded-md shadow-sm">';
+                            html += '<p class="text-sm text-gray-800">' + (item.authorRev[i] || '') + '</p>';
+                            html += '<p class="mt-2 text-xs text-gray-500">— ' + (item.textRev[i] || '') + '</p>';
+                            html += '</div>';
+                        }
+                    }
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</td>';
+                    html += '</tr>';
+                });
+                $('#items-table-body').append(html);
+            }
+            function updateData(likes, reviews) {
+                $.ajax({
+                    url: '/Home/UpdateFilterData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        likes: likes,
+                        reviews: reviews,
+                        books: currentBooks
+                    }),
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            currentBooks = data;
+                            $('#items-table-body').empty();
+                            renderItems(data);
+                            $('html, body').animate({
+                                scrollTop: 0
+                            }, 500);
+                            hasMoreData = true;
+                        }
+                    },
+                    complete: function () {
+                        isLoading = false;
+                        $('#loading-spinner').hide();
+                    }
+                });
+            }
+            function regenerateBooks() {
+                isLoading = true;
+                currentLanguage = $('#languageSelect').val();
+                $('#loading-spinner').show();
+                $.ajax({
+                    url: '/Home/TranslateBooks',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        books: currentBooks,
+                        language: currentLanguage
+                    }),
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            currentBooks = data;
+                            $('#items-table-body').empty();
+                            renderItems(data);
+                            $('html, body').animate({
+                                scrollTop: 0
+                            }, 500);
+                            hasMoreData = true;
+                        }
+                    },
+                    complete: function () {
+                        isLoading = false;
+                        $('#loading-spinner').hide();
+                    }
+                });
+            }
+            function regenerateTableWithoutSeed() {
+                $('#loading-spinner').show();
+                $('#items-table-body').empty();
+                $.ajax({
+                    url: '/Home/GenerateBooksWithoutSeed',
+                    type: 'GET',
+                    success: function (response) {
+                        $('#seedInput').val(response.seed);
+                        renderItems(response.books);
+                    },
+                    complete: function () {
+                        $('#loading-spinner').hide();
+                    }
+                });
+            }
+            function regenerateTableWithSeed(seed) {
+                $('#loading-spinner').show();
+                $('#items-table-body').empty();
+                $.ajax({
+                    url: '/Home/GenerateBooksWithSeed',
+                    type: 'GET',
+                    data: { seed: seed },
+                    success: function (response) {
+                        if (response && response.length > 0) {
+                            renderItems(response);
+                        }
+                    },
+                    complete: function () {
+                        $('#loading-spinner').hide();
+                    }
+                });
+            }
+            function loadMoreItems() {
+                isLoading = true;
+                $('#loading-spinner').show();
+                $.ajax({
+                    url: '/Home/GetMoreItems',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(currentBooks),
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            renderItems(data);
+                            currentBooks = currentBooks.concat(data);
+                        } else {
+                            hasMoreData = false;
+                            console.log("Больше данных нет.");
+                        }
+                    },
+                    complete: function () {
+                        isLoading = false;
+                        $('#loading-spinner').hide();
+                    }
+                });
+            }
+            updateStickyHeaderPosition();
+            $(window).on('resize', updateStickyHeaderPosition);
+            $('#items-table-body').on('click', '.item-row', function () {
+                var itemId = $(this).data('item-id');
+                var detailsRow = $('#details-' + itemId);
+                detailsRow.toggle();
+            });
+            $('#likesRange').on('input', function() {
+                var likes = $(this).val();
+                $('#likesValueDisplay').text(parseFloat(likes).toFixed(1));
+            }).on('change', function() {
+                var likes = $(this).val();
+                var reviews = $('#reviewInput').val();
+                updateData(likes, reviews);
+            });
+            $('#reviewInput').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    var likes = $('#likesRange').val();
+                    var reviews = $(this).val();
+                    updateData(likes, reviews);
+                }
+            });
+            $('#addReviewBtn').on('click', function() {
+                var currentReview = parseFloat($('#reviewInput').val());
+                if (!isNaN(currentReview)) {
+                    var reviews = (currentReview + 0.1).toFixed(1);
+                    $('#reviewInput').val(reviews);
+                    var likes = $('#likesRange').val();
+                    updateData(likes, reviews);
+                }
+            });
+            $('#languageSelect').on('change', regenerateBooks);
+            $('#randomSeedBtn').on('click', regenerateTableWithoutSeed);
+            $('#seedInput').on('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    var seed = $(this).val();
+                    regenerateTableWithSeed(seed);
+                }
+            });
+            $(window).scroll(function () {
+                if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100 && !isLoading && hasMoreData) {
+                    loadMoreItems();
+                }
+            });
+        });
     </script>
-    <script src="~/js/book.js"></script>
 }

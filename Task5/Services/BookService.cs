@@ -46,7 +46,7 @@ namespace Task5.Services
         }
         public List<Book> RecreateTwentyBooks(List<Book> ListOfBooks)
         {
-            ListOfBooks.Clear();
+            ListOfBooks = new List<Book>();
             bias = 0;
             CreateTwentyBooks(ListOfBooks);
             return ListOfBooks;
