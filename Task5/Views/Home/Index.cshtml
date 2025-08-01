@@ -126,7 +126,10 @@
 </div>
 @section Scripts {
     <script>
-        $(document).ready(function () {
+                $(document).ready(function () {
+            var seedTimer;
+            var reviewTimer;
+
             function validateReviewValue(value) {
                 var numValue = parseFloat(value);
                 if (isNaN(numValue)) {
@@ -379,8 +382,27 @@
                 var reviews = $('#reviewInput').val();
                 updateData(likes, reviews);
             });
+            $('#reviewInput').on('input', function() {
+                if (reviewTimer) {
+                    clearTimeout(reviewTimer);
+                }
+
+                var reviews = $(this).val();
+                var likes = $('#likesRange').val();
+
+                reviewTimer = setTimeout(function() {
+                    if (reviews.trim() !== '') {
+                        updateData(likes, reviews);
+                    }
+                }, 2000);
+            });
+
             $('#reviewInput').on('keydown', function(e) {
                 if (e.key === 'Enter') {
+                    if (reviewTimer) {
+                        clearTimeout(reviewTimer);
+                    }
+
                     var likes = $('#likesRange').val();
                     var reviews = $(this).val();
                     updateData(likes, reviews);
@@ -397,13 +419,34 @@
             });
             $('#languageSelect').on('change', regenerateBooks);
             $('#randomSeedBtn').on('click', regenerateTableWithoutSeed);
+
+            $('#seedInput').on('input', function() {
+                if (seedTimer) {
+                    clearTimeout(seedTimer);
+                }
+
+                var seed = $(this).val();
+
+                seedTimer = setTimeout(function() {
+                    if (seed.trim() !== '') {
+                        regenerateTableWithSeed(seed);
+                    }
+                }, 2000);
+            });
+
             $('#seedInput').on('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
+
+                    if (seedTimer) {
+                        clearTimeout(seedTimer);
+                    }
+
                     var seed = $(this).val();
                     regenerateTableWithSeed(seed);
                 }
             });
+
             $(window).scroll(function () {
                 if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100 && !isLoading && hasMoreData) {
                     loadMoreItems();
