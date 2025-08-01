@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Task5/Task5/Task5.csproj", "Task5/"]
-RUN dotnet restore "./Task5/Task5/Task5.csproj"
+RUN dotnet restore "./Task5/Task5.csproj"
 COPY . .
 WORKDIR "/src/Task5"
 RUN dotnet build "./Task5/Task5.csproj" -c $BUILD_CONFIGURATION -o /app/build
