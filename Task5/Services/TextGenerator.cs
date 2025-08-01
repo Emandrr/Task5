@@ -3,6 +3,7 @@ using MathNet.Numerics.Random;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System;
 using System.Collections.Generic;
+using GenFu;
 namespace Task5.Services
 {
     public class TextGenerator
@@ -50,7 +51,7 @@ namespace Task5.Services
 
         public string Title()
         {
-            return lorem.Sentence(1, 3).TrimEnd('.');
+            return faker.Locale==("en")?faker.Company.CatchPhrase()+".":lorem.Sentence(1,3).TrimEnd('.');
         }
 
         public string PublisherNameWithDate()
@@ -92,8 +93,9 @@ namespace Task5.Services
         public List<string> GetSetOfReviewsText(double reviews)
         {
             List<string> rews = new List<string>();
-            for (int i = 0; i < Math.Floor(reviews); ++i) rews.Add(faker.Lorem.Sentence());
-            if (faker.Random.Double(0, 1) < reviews- Math.Floor(reviews)) rews.Add(faker.Lorem.Sentence());
+            if (faker.Locale != "en") for (int i = 0; i < Math.Floor(reviews); ++i) rews.Add(faker.Lorem.Sentence());
+            else rews = faker.Rant.Reviews("book", (int)Math.Floor(reviews)).ToList<string>();
+            if (faker.Random.Double(0, 1) < reviews- Math.Floor(reviews)) rews.Add(faker.Locale == ("en") ? faker.Hacker.Phrase():faker.Lorem.Sentence());
             return rews;
         }
         
