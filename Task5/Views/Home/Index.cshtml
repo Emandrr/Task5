@@ -315,6 +315,7 @@
                     type: 'GET',
                     success: function (response) {
                         $('#seedInput').val(response.seed);
+                        currentBooks = response.books
                         renderItems(response.books);
                     },
                     complete: function () {
@@ -331,6 +332,7 @@
                     data: { seed: seed },
                     success: function (response) {
                         if (response && response.length > 0) {
+                            currentBooks = response
                             renderItems(response);
                         }
                     },

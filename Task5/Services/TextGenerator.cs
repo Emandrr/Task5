@@ -45,7 +45,7 @@ namespace Task5.Services
 
         public int GenerateSeed()
         {
-            return faker.Random.Int();
+            return faker.Random.Int(0,1000000);
         }
 
         public string Title()
