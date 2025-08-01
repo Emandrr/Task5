@@ -1,0 +1,135 @@
+﻿@model IEnumerable<Task5.Models.Book>
+@{
+    ViewData["Title"] = "Список элементов";
+}
+@using System.Text.Json
+
+<style>
+    .sticky-controls {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background-color: #fff;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    }
+
+    .sticky-header {
+        position: sticky;
+        top: 80px;
+        z-index: 1010;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0,0,0,.05);
+    }
+
+    .item-row {
+        cursor: pointer;
+    }
+
+    .details-row {
+        display: none;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 20px;
+        display: none;
+    }
+</style>
+
+<div class="sticky-controls d-flex align-items-center justify-content-between p-3">
+    <div class="d-flex align-items-center">
+        <div class="input-group me-3">
+            <label for="languageSelect" class="input-group-text">Language</label>
+            <select id="languageSelect" class="form-select">
+                <option value="en">Vietnam (Tiếng Việt)</option>
+                <option value="ja">Japanese (日本語)</option>
+                <option value="fa">Farsi (فارسی)</option>
+            </select>
+        </div>
+        <div class="input-group me-3">
+            <label for="seedInput" class="input-group-text">Seed</label>
+            <input type="text" id="seedInput" class="form-control" value="@ViewBag.Seed" placeholder="Enter seed...">
+            <button class="btn btn-outline-secondary" id="randomSeedBtn" title="Сгенерировать случайный Seed">
+                <i class="fas fa-dice"></i>
+            </button>
+        </div>
+        <div class="me-3">
+            <label for="likesRange" class="form-label">Likes</label>
+            <input type="range" id="likesRange" class="form-range" min="0" max="10" step="0.1" value="5">
+            <div class="mt-2"><span id="likesValueDisplay">5.0</span></div>
+        </div>
+        <div class="input-group me-3">
+            <label for="reviewInput" class="input-group-text">Review</label>
+            <input type="number" id="reviewInput" class="form-control" min="0" max="10" value="5.0" step="0.1">
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead class="sticky-header">
+        <tr>
+            <th>#</th>
+            <th>ISBN</th>
+            <th>Title</th>
+            <th>Author(s)</th>
+            <th>Publisher</th>
+        </tr>
+    </thead>
+    <tbody id="items-table-body">
+        @foreach (var item in Model)
+        {
+            <tr class="item-row" data-item-id="@item.Id">
+                <td>@item.Id</td>
+                <td>@item.Isbn</td>
+                <td>@item.Title</td>
+                <td>@item.Author</td>
+                <td>@item.Publisher</td>
+            </tr>
+            <tr class="details-row" id="details-@item.Id">
+                <td colspan="3">
+                    <div class="book-details-container">
+                        <div class="book-layout">
+                            <div class="book-image-section">
+                                <div class="book-image-container">
+                                    <img src="@Html.Raw(item.Image)" alt="Обложка книги" />
+                                </div>
+                                <div class="book-likes">
+                                    <span class="likes-count">@item.NumberOfLikes</span>
+                                    <span class="like-icon">👍</span>
+                                </div>
+                            </div>
+                            <div class="book-info-section">
+                                <h2 class="book-title">@item.Title</h2>
+                                <p class="book-author">by @item.Author</p>
+                                <p class="book-group">@item.Publisher</p>
+                                <div class="space-y-4">
+                                    @for (int i = 0; i < item.AuthorRev.Count; ++i)
+                                    {
+                                        <div class="p-3 bg-white border rounded-md shadow-sm">
+                                            <p class="text-sm text-gray-800">@item.AuthorRev[i]</p>
+                                            <p class="mt-2 text-xs text-gray-500">— @item.TextRev[i]</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="loading-spinner" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Загрузка...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.currentBooks = @Html.Raw(JsonSerializer.Serialize(Model));
+    </script>
+    <script src="~/js/book.js"></script>
+}

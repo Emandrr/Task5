@@ -1,0 +1,166 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+.book-details-container {
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.book-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.book-image-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.book-image-container {
+    width: 150px;
+    margin-bottom: 15px;
+}
+
+    .book-image-container img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+.book-likes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.likes-count {
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+}
+
+.like-icon {
+    color: #3498db;
+    font-size: 18px;
+}
+
+.book-info-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.book-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.book-author {
+    font-size: 16px;
+    margin: 0 0 4px 0;
+    color: #666;
+}
+
+.book-group {
+    font-size: 14px;
+    margin: 0 0 20px 0;
+    color: #999;
+}
+
+.reviews-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.reviews-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    border-left: 3px solid #ddd;
+    padding-left: 15px;
+}
+
+.review-text {
+    margin: 0 0 5px 0;
+    line-height: 1.5;
+    color: #333;
+}
+
+.review-author {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+.review-source {
+    color: #999;
+}
+
+@media (max-width: 768px) {
+    .book-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .book-image-section {
+        align-self: center;
+    }
+
+    .book-image-container {
+        width: 120px;
+    }
+}
+.btn:focus,
+.btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 5px; /* ƒобавил небольшой отступ, чтобы метки не прилипали к кра€м */
+}
+
+    .range-labels span {
+        text-align: center;
+        /* ѕри необходимости, можно добавить дополнительные стили, например: */
+        /* font-size: 0.8rem; */
+        /* color: #6c757d; */
+    }
