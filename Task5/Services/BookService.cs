@@ -11,7 +11,7 @@ namespace Task5.Services
         private double likesDef = 5;
         private double reviewsDef = 5.0;
 
-        public BookService(TextGenerator TextGenerator,ImageGenerator ImageGenerator)
+        public BookService(TextGenerator TextGenerator, ImageGenerator ImageGenerator)
         {
             _textGenerator = TextGenerator;
             _imageGenerator = ImageGenerator;
@@ -37,7 +37,7 @@ namespace Task5.Services
         {
             _textGenerator.ChangeSeed(seed, bias);
             _imageGenerator.ChangeSeed(seed, bias);
-            for (int i=bias+1;i<=bias+20;++i)
+            for (int i = bias + 1; i <= bias + 20; ++i)
             {
                 ListOfBooks.Add(Create(i));
             }
@@ -69,16 +69,16 @@ namespace Task5.Services
             return RecreateTwentyBooks(new List<Book>());
         }
 
-        public List<Book> RecreateAdditionalInfo(double likes,double reviews,List<Book> oldList)
+        public List<Book> RecreateAdditionalInfo(double likes, double reviews, List<Book> oldList)
         {
             if (likes != likesDef) RecreateLikes(likes, oldList);
             if (reviews != reviewsDef) RecreateReviews(reviews, oldList);
             return oldList;
         }
-        public void RecreateLikes(double likes,List<Book> oldList)
+        public void RecreateLikes(double likes, List<Book> oldList)
         {
             likesDef = likes;
-            for(int i=0;i<oldList.Count;++i)
+            for (int i = 0; i < oldList.Count; ++i)
             {
                 oldList[i].NumberOfLikes = _textGenerator.GetLikes(likes);
             }
@@ -88,8 +88,8 @@ namespace Task5.Services
             reviewsDef = reviews;
             for (int i = 0; i < oldList.Count; ++i)
             {
-                oldList[i].TextRev = _textGenerator.GetSetOfReviewsText(reviewsDef);
                 oldList[i].AuthorRev = _textGenerator.GetSetOfReviewsAuthor(reviewsDef);
+                oldList[i].TextRev = _textGenerator.GetSetOfReviewsText(reviewsDef);
             }
         }
     }
